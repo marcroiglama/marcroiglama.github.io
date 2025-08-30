@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BPM Tap Counter</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BPM Tap">
+<style>
+  body {
+    margin: 0;
+    background: #0f0f0f;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+  #tapArea {
+    width: min(80vw, 320px);
+    height: min(80vw, 320px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    background: #2a2a2a;
+    border: 2px solid #3a3a3a;
+    transition: transform 0.06s ease, background 0.2s ease;
+  }
+  #tapArea:active { transform: scale(0.98); background: #3a3a3a; }
+  #bpm { margin-top: 18px; font-size: 40px; font-weight: 800; }
+  .btn { margin-top: 15px; padding: 10px 14px; border-radius: 14px; border: none; }
+</style>
+</head>
+<body>
+  <h1>BPM Tap (sin anuncios)</h1>
+  <div id="tapArea">TAP</div>
+  <div id="bpm">0 BPM</div>
+  <button id="reset" class="btn">Reset</button>
+<script>
+let taps = [];
+let lastTap = 0;
+const bpmEl = document.getElementById('bpm');
+const tapArea = document.getElementById('tapArea');
+tapArea.addEventListener('click', () => {
+  const now = performance.now();
+  if (lastTap && now - lastTap > 2000) taps = [];
+  lastTap = now;
+  taps.push(now);
+  if (taps.length > 8) taps.shift();
+  if (taps.length > 1) {
+    let intervals = [];
+    for (let i=1; i<taps.length; i++) intervals.push(taps[i]-taps[i-1]);
+    const avg = intervals.reduce((a,b)=>a+b,0)/intervals.length;
+    const bpm = Math.round(60000/avg);
+    bpmEl.textContent = bpm + " BPM";
+  }
+});
+document.getElementById('reset').addEventListener('click', ()=>{
+  taps=[]; lastTap=0; bpmEl.textContent="0 BPM";
+});
+</script>
+</body>
+</html>
